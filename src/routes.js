@@ -37,8 +37,28 @@ export const routes = [
     },
     {
         method: 'PUT',
-        path: buildRoutePath('/tasks'),
+        path: buildRoutePath('/tasks/:id'),
         handler: (req, res) => {
+            const { id } = req.params;
+            const { title, description } = req.body
+
+            const [task] = database.select('tasks').filter(task => task.id === id)
+
+            if(task){
+                if(!task.completed_at){
+                    database.update('tasks', id, {
+                        ...task,
+                        title, 
+                        description
+                    })
+
+                    return res.writeHead(201).end()
+                }
+
+                return res.writeHead(401).end(JSON.stringify("Task alredy completed"))
+            }
+
+            return res.end()
 
         }
     },
@@ -50,7 +70,7 @@ export const routes = [
 
             const rowExists = database.delete('tasks', id)
 
-            if(rowExists === null){
+            if (rowExists === null) {
                 return res.writeHead(401).end(JSON.stringify("Task not exist"))
             }
 
@@ -59,9 +79,29 @@ export const routes = [
     },
     {
         method: 'PATCH',
-        path: buildRoutePath('/tasks'),
+        path: buildRoutePath('/tasks/:id/complete'),
         handler: (req, res) => {
+            const { id } = req.params
 
+            const tasks = database.select('tasks')
+            const task = tasks.filter(task => task.id === id)
+            const { title, description, created_at } = task[0]
+
+
+            if (task) {
+                if(!task[0].completed_at){
+                    database.update('tasks', id, {
+                        id,
+                        ...task[0],
+                        completed_at: new Date(),
+
+                    })
+    
+                    return res.writeHead(201).end()
+                }
+
+                return res.writeHead(401).end(JSON.stringify("Task alredy completed"))
+            }
         }
     },
 ]
