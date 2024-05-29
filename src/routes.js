@@ -20,6 +20,10 @@ export const routes = [
         path: buildRoutePath('/tasks'),
         handler: (req, res) => {
             const { title, description } = req.body;
+            
+            if(!title || !description){
+                return res.writeHead(400).end(JSON.stringify("Title or description is missing"))
+            }
 
             const task = {
                 id: randomUUID(),
@@ -41,6 +45,10 @@ export const routes = [
         handler: (req, res) => {
             const { id } = req.params;
             const { title, description } = req.body
+
+            if(!title || !description){
+                return res.writeHead(400).end(JSON.stringify("Title or description is missing"))
+            }
 
             const [task] = database.select('tasks').filter(task => task.id === id)
 
